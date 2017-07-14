@@ -76,6 +76,9 @@ var Player = function() {
                 game.removeScore();
                 $('.points').text(game.score);
                 $('.gems').text(game.gemsCollected);
+                $('.blue-gems').text(game.blueGems);
+                $('.green-gems').text(game.greenGems);
+                $('.orange-gems').text(game.orangeGems);
 
                 // I was having flickering issues with .fadeIn(), so I decided to use
                 // .animate() instead
@@ -170,14 +173,17 @@ var Gem = function(color, x, y) {
     if (color === 'blue') {
         this.sprite = 'images/Gem-Blue.png';
         this.pointAmount = 100;
+        this.type = color;
     }
     else if (color === 'green') {
         this.sprite = 'images/Gem-Green.png';
         this.pointAmount = 200;
+        this.type = color;
     }
     else if (color === 'orange') {
         this.sprite = 'images/Gem-Orange.png';
         this.pointAmount = 300;
+        this.type = color;
     }
     this.x = x;
     this.y = y;
@@ -191,6 +197,15 @@ Gem.prototype.update = function() {
         // Remove the gem from the gems array so that it disappears from the screen
         gems.pop();
         game.gemsCollected++;
+        if (this.type === 'blue') {
+            game.blueGems++;
+        }
+        else if (this.type === 'green') {
+            game.greenGems++;
+        }
+        else if (this.type === 'orange') {
+            game.orangeGems++;
+        }
         game.addPoints(this.pointAmount);
 
         // Generate a new gem after a slight delay
@@ -209,6 +224,9 @@ var game = {
     livesRemaining: 3,
     score: 0,
     gemsCollected: 0,
+    blueGems: 0,
+    greenGems: 0,
+    orangeGems: 0,
     start: function() {
         player.resetPosition();
         this.isOver = false;
@@ -216,6 +234,9 @@ var game = {
         this.score = 0;
         gems = [];
         this.gemsCollected = 0;
+        this.blueGems = 0;
+        this.greenGems = 0;
+        this.orangeGems = 0;
         this.drawScore();
         this.drawHearts();
         this.generateGem();
@@ -267,6 +288,9 @@ var game = {
     },
     generateGem: function() {
         var color = this.getGemColor();
+
+        // If the gem position is too close to the player, try again.
+        // Basically, a new gem will never appear near the player
         do {
             var i = this.getGemLocation();
         } while (gemLocations[i][0] + 150 > player.x && gemLocations[i][0] - 150 < player.x &&
