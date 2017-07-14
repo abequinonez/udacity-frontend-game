@@ -65,7 +65,7 @@ var Player = function() {
             game.addPoints(100);
         }
 
-        // If player's lives reaches 0, freeze both the player and the enemies
+        // If player's lives reaches 0, end the game
         if (!game.isOver) {
             if (game.livesRemaining <= 0) {
                 game.isOver = true;
@@ -184,26 +184,25 @@ var Gem = function(color, x, y) {
 };
 
 Gem.prototype.update = function() {
-    // Check and handle collision
-    // if (!player.alreadyCollided) {
-        if (this.x - 5 > player.x && this.x - 40 < player.x &&
-            this.y - 40 > player.y && this.y - 75 < player.y) {
-            // player.alreadyCollided = true;
-            // player.loseALife();
-            gems.pop();
-            game.gemsCollected++;
-            game.addPoints(this.pointAmount);
-        }
-    // }
+    // Check if the player is within range of picking up a gem
+    if (this.x - 5 > player.x && this.x - 40 < player.x &&
+        this.y - 40 > player.y && this.y - 75 < player.y) {
+
+        // Remove the gem from the gems array so that it disappears from the screen
+        gems.pop();
+        game.gemsCollected++;
+        game.addPoints(this.pointAmount);
+
+        // Generate a new gem after a slight delay
+        setTimeout(function() {
+            game.generateGem();
+        }, 100);
+    }
 };
 
 Gem.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y, 60, 102);
 };
-
-// Gem.prototype.draw = function() {
-//     ctx.drawImage(this.sprite, this.x, this.y, 80, 80);
-// };
 
 var game = {
     isOver: false,
@@ -215,6 +214,7 @@ var game = {
         this.isOver = false;
         this.livesRemaining = 3;
         this.score = 0;
+        gems = [];
         this.gemsCollected = 0;
         this.drawScore();
         this.drawHearts();
@@ -260,12 +260,18 @@ var game = {
             return 'orange';
         }
     },
+
+    // MDN used as a reference
     getGemLocation: function() {
-        
+        return Math.floor(Math.random() * gemLocations.length);
     },
     generateGem: function() {
         var color = this.getGemColor();
-        gems.push(new Gem(color, 222, 105));
+        do {
+            var i = this.getGemLocation();
+        } while (gemLocations[i][0] + 150 > player.x && gemLocations[i][0] - 150 < player.x &&
+                gemLocations[i][1] + 150 > player.y && gemLocations[i][1] - 150 < player.y);
+        gems.push(new Gem(color, gemLocations[i][0], gemLocations[i][1]));
     }
 };
 
@@ -296,10 +302,10 @@ var heart2 = new Heart(435, 5);
 var heart3 = new Heart(470, 5);
 var heartSprites;
 
-// var gem1 = new Gem('blue', 222, 105);
-// var gems = [gem1];
 var gems = [];
-var gemLocations = [];
+var gemLocations = [[20, 105], [121, 105], [222, 105], [323, 105], [424, 105],
+                    [20, 188], [121, 188], [222, 188], [323, 188], [424, 188],
+                    [20, 271], [121, 271], [222, 271], [323, 271], [424, 271]];
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
