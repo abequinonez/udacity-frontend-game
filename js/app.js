@@ -75,6 +75,7 @@ var Player = function() {
                 });
                 game.removeScore();
                 $('.points').text(game.score);
+                $('.gems').text(game.gemsCollected);
 
                 // I was having flickering issues with .fadeIn(), so I decided to use
                 // .animate() instead
@@ -165,6 +166,109 @@ Heart.prototype.remove = function() {
     ctx.clearRect(this.x, this.y, 30, 43);
 };
 
+var Gem = function(color, x, y) {
+    if (color === 'blue') {
+        this.sprite = 'images/Gem-Blue.png';
+        this.pointAmount = 100;
+    }
+    else if (color === 'green') {
+        this.sprite = 'images/Gem-Green.png';
+        this.pointAmount = 200;
+    }
+    else if (color === 'orange') {
+        this.sprite = 'images/Gem-Orange.png';
+        this.pointAmount = 300;
+    }
+    this.x = x;
+    this.y = y;
+};
+
+Gem.prototype.update = function() {
+    // Check and handle collision
+    // if (!player.alreadyCollided) {
+        if (this.x - 5 > player.x && this.x - 40 < player.x &&
+            this.y - 40 > player.y && this.y - 75 < player.y) {
+            // player.alreadyCollided = true;
+            // player.loseALife();
+            gems.pop();
+            game.gemsCollected++;
+            game.addPoints(this.pointAmount);
+        }
+    // }
+};
+
+Gem.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y, 60, 102);
+};
+
+// Gem.prototype.draw = function() {
+//     ctx.drawImage(this.sprite, this.x, this.y, 80, 80);
+// };
+
+var game = {
+    isOver: false,
+    livesRemaining: 3,
+    score: 0,
+    gemsCollected: 0,
+    start: function() {
+        player.resetPosition();
+        this.isOver = false;
+        this.livesRemaining = 3;
+        this.score = 0;
+        this.gemsCollected = 0;
+        this.drawScore();
+        this.drawHearts();
+        this.generateGem();
+        allEnemies.forEach(function(enemy) {
+            enemy.canMove = true;
+        });
+    },
+    drawScore: function() {
+        ctx.font = "18pt arial";
+        ctx.textAlign = 'left';
+        ctx.fillStyle = 'black';
+        ctx.fillText('Score: ' + this.score, 0, 40);
+    },
+    removeScore: function() {
+        // ctx.fillStyle = 'black';
+        ctx.clearRect(0, 8, 300, 40);
+        // ctx.fillRect(0, 8, 300, 40);
+    },
+    addPoints: function(points) {
+        this.score += points;
+        this.removeScore();
+        ctx.fillText('Score: ' + this.score, 0, 40);
+    },
+    drawHearts: function() {
+        heartSprites = [heart1, heart2, heart3];
+        heartSprites.forEach(function(heart) {
+            heart.draw();
+        });
+    },
+
+    // Random number with probability developed with help from
+    // Stack Overflow
+    getGemColor: function() {
+        var num = Math.random();
+        if (num < 0.6) {
+            return 'blue';
+        }
+        else if (num < 0.9) {
+            return 'green';
+        }
+        else {
+            return 'orange';
+        }
+    },
+    getGemLocation: function() {
+        
+    },
+    generateGem: function() {
+        var color = this.getGemColor();
+        gems.push(new Gem(color, 222, 105));
+    }
+};
+
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
@@ -192,6 +296,11 @@ var heart2 = new Heart(435, 5);
 var heart3 = new Heart(470, 5);
 var heartSprites;
 
+// var gem1 = new Gem('blue', 222, 105);
+// var gems = [gem1];
+var gems = [];
+var gemLocations = [];
+
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
 document.addEventListener('keydown', function(e) {
@@ -208,45 +317,6 @@ document.addEventListener('keydown', function(e) {
     }
     player.handleInput(allowedKeys[e.keyCode]);
 });
-
-var game = {
-    isOver: false,
-    livesRemaining: 3,
-    score: 0,
-    start: function() {
-        player.resetPosition();
-        this.isOver = false;
-        this.livesRemaining = 3;
-        this.score = 0;
-        this.drawScore();
-        this.drawHearts();
-        allEnemies.forEach(function(enemy) {
-            enemy.canMove = true;
-        });
-    },
-    drawScore: function() {
-        ctx.font = "18pt arial";
-        ctx.textAlign = 'left';
-        ctx.fillStyle = 'black';
-        ctx.fillText('Score: ' + this.score, 0, 40);
-    },
-    removeScore: function() {
-        // ctx.fillStyle = 'black';
-        ctx.clearRect(0, 8, 300, 40);
-        // ctx.fillRect(0, 8, 300, 40);
-    },
-    addPoints: function(points) {
-        this.score += points;
-        this.removeScore();
-        ctx.fillText('Score: ' + this.score, 0, 40);
-    },
-    drawHearts: function() {
-        heartSprites = [heart1, heart2, heart3];
-        heartSprites.forEach(function(heart) {
-            heart.draw();
-        });
-    }
-};
 
 // Add the event listener after the page has finished loading
 $(function() {
