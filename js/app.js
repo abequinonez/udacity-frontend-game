@@ -32,8 +32,8 @@ Enemy.prototype.update = function(dt) {
 
     // Check and handle collision
     if (!player.alreadyCollided) {
-        if (this.x + 60 > player.x && this.x - 60 < player.x &&
-            this.y + 60 > player.y && this.y - 60 < player.y) {
+        if (this.x + 63 > player.x && this.x - 63 < player.x &&
+            this.y + 63 > player.y && this.y - 63 < player.y) {
             player.alreadyCollided = true;
             player.loseALife();
         }
