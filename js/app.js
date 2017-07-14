@@ -74,6 +74,7 @@ var Player = function() {
                     enemy.canMove = false;
                 });
                 game.removeScore();
+                game.removeGemTotal();
                 $('.points').text(game.score);
                 $('.gems').text(game.gemsCollected);
                 $('.blue-gems').text(game.blueGems);
@@ -160,13 +161,13 @@ var Heart = function(x, y) {
 
 // Image scaling learned from Stack Overflow
 Heart.prototype.draw = function() {
-    ctx.drawImage(this.sprite, this.x, this.y, 30, 30 * this.sprite.height / this.sprite.width);
+    ctx.drawImage(this.sprite, this.x, this.y, 28, 28 * this.sprite.height / this.sprite.width);
 };
 
 Heart.prototype.remove = function() {
     // ctx.fillStyle = 'black';
-    // ctx.fillRect(this.x, this.y, 30, 43);
-    ctx.clearRect(this.x, this.y, 30, 43);
+    // ctx.fillRect(this.x, this.y, 28, 40);
+    ctx.clearRect(this.x, this.y, 28, 40);
 };
 
 var Gem = function(color, x, y) {
@@ -207,6 +208,7 @@ Gem.prototype.update = function() {
             game.orangeGems++;
         }
         game.addPoints(this.pointAmount);
+        game.drawGemTotal();
 
         // Generate a new gem after a slight delay
         setTimeout(function() {
@@ -238,27 +240,41 @@ var game = {
         this.greenGems = 0;
         this.orangeGems = 0;
         this.drawScore();
+        this.drawGemTotal();
         this.drawHearts();
         this.generateGem();
         allEnemies.forEach(function(enemy) {
             enemy.canMove = true;
         });
     },
-    drawScore: function() {
-        ctx.font = "18pt arial";
+    formatDisplayText: function() {
+        ctx.font = "16pt arial";
         ctx.textAlign = 'left';
-        ctx.fillStyle = 'black';
-        ctx.fillText('Score: ' + this.score, 0, 40);
+        ctx.fillStyle = 'black'; 
+    },
+    drawScore: function() {
+        this.formatDisplayText();
+        this.removeScore();
+        ctx.fillText('Score: ' + this.score, 0, 42);
     },
     removeScore: function() {
+        ctx.clearRect(0, 15, 240, 33);
         // ctx.fillStyle = 'black';
-        ctx.clearRect(0, 8, 300, 40);
-        // ctx.fillRect(0, 8, 300, 40);
+        // ctx.fillRect(0, 15, 240, 33);
     },
     addPoints: function(points) {
         this.score += points;
-        this.removeScore();
-        ctx.fillText('Score: ' + this.score, 0, 40);
+        this.drawScore();
+    },
+    drawGemTotal: function() {
+        this.formatDisplayText();
+        this.removeGemTotal();
+        ctx.fillText('Gems: ' + this.gemsCollected, 243, 42);
+    },
+    removeGemTotal: function() {
+        ctx.clearRect(243, 15, 160, 33);
+        // ctx.fillStyle = 'black';
+        // ctx.fillRect(243, 15, 160, 33);
     },
     drawHearts: function() {
         heartSprites = [heart1, heart2, heart3];
@@ -321,9 +337,9 @@ var allEnemies = [bug1, bug2, bug3, bug4, bug5, bug6, bug7, bug8];
 var player = new Player();
 
 // Player lives
-var heart1 = new Heart(400, 5);
-var heart2 = new Heart(435, 5);
-var heart3 = new Heart(470, 5);
+var heart1 = new Heart(405, 8);
+var heart2 = new Heart(440, 8);
+var heart3 = new Heart(475, 8);
 var heartSprites;
 
 var gems = [];
