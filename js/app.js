@@ -11,9 +11,13 @@ var Enemy = function(x, y, speed) {
     this.x = x;
     this.y = y;
 
-    // Store the original x position
+    // Store the original x position (used to reset an enemy's position)
     this.originalXPos = x;
+
+    // The enemy's speed (received as a parameter)
     this.speed = speed;
+
+    // Enemies cannot move until the game starts
     this.canMove = false;
 };
 
@@ -49,6 +53,7 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
+// Reset the enemy's position
 Enemy.prototype.resetPosition = function() {
     this.x = this.originalXPos;
 };
@@ -63,6 +68,8 @@ var Player = function() {
     // Initial player starting position
     this.x = 200;
     this.y = 380;
+
+    // The player cannot move until the game starts
     this.canMove = false;
     this.alreadyCollided = false;
     this.blinkInterval;
@@ -76,22 +83,7 @@ var Player = function() {
         // If player's lives reaches 0, end the game
         if (!game.isOver) {
             if (game.livesRemaining <= 0) {
-                game.isOver = true;
-                this.canMove = false;
-                allEnemies.forEach(function(enemy) {
-                    enemy.canMove = false;
-                });
-                game.removeScore();
-                game.removeGemTotal();
-                $('.points').text(game.score);
-                $('.gems').text(game.gemsCollected);
-                $('.blue-gems').text(game.blueGems);
-                $('.green-gems').text(game.greenGems);
-                $('.orange-gems').text(game.orangeGems);
-
-                // I was having flickering issues with .fadeIn(), so I decided to use
-                // .animate() instead
-                $('.dark-overlay, .game-over-box').show().animate({opacity: 1}, 'fast');
+                game.end();
             }
         }
     };
@@ -135,17 +127,16 @@ var Player = function() {
         allEnemies.forEach(function(enemy) {
             enemy.canMove = false;
         });
-        this.blinkEffect();
-        setTimeout(function() {
-            if (game.livesRemaining > 0) {
+        if (game.livesRemaining > 0) {
+            this.blinkEffect();
+            setTimeout(function() {
                 allEnemies.forEach(function(enemy) {
                     enemy.canMove = true;
                 });
                 player.resetPosition();
-            }
-            clearInterval(this.blinkInterval);
-        }.bind(this), 1500);
-        
+                clearInterval(this.blinkInterval);
+            }.bind(this), 1500);
+        }
     };
     this.blinkEffect = function() {
         var currentLocation = this.x;
@@ -321,6 +312,24 @@ var game = {
         } while (gemLocations[i][0] + 150 > player.x && gemLocations[i][0] - 150 < player.x &&
                 gemLocations[i][1] + 150 > player.y && gemLocations[i][1] - 150 < player.y);
         gems.push(new Gem(color, gemLocations[i][0], gemLocations[i][1]));
+    },
+    end: function() {
+        this.isOver = true;
+        player.canMove = false;
+        allEnemies.forEach(function(enemy) {
+            enemy.canMove = false;
+        });
+        this.removeScore();
+        this.removeGemTotal();
+        $('.points').text(this.score);
+        $('.gems').text(this.gemsCollected);
+        $('.blue-gems').text(this.blueGems);
+        $('.green-gems').text(this.greenGems);
+        $('.orange-gems').text(this.orangeGems);
+
+        // I was having flickering issues with .fadeIn(), so I decided to use
+        // .animate() instead
+        $('.dark-overlay, .game-over-box').show().animate({opacity: 1}, 'fast');
     }
 };
 
