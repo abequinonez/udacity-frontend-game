@@ -27,14 +27,12 @@ Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
-    // this.speed * dt;
     if (this.canMove) {
         this.x += this.speed * dt;
     }
 
     // Reset enemy position once it leaves the visible canvas
     if (this.x > 505) {
-        // this.x = this.originalXPos;
         this.resetPosition();
     }
 
@@ -71,8 +69,15 @@ var Player = function() {
 
     // The player cannot move until the game starts
     this.canMove = false;
+
+    // Used to prevent multiple calls to player.loseALife() when checking for
+    // collision in Enemy.update()
     this.alreadyCollided = false;
+
+    // Interval timer ID used in player.blinkEffect()
     this.blinkInterval;
+
+    // Keeps track of the player's state
     this.update = function() {
         // If the player reaches the water, reset their position and add points
         if (this.y <= -35) {
@@ -92,6 +97,9 @@ var Player = function() {
     this.render = function() {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     };
+
+    // Receives user input with keys defined in allowedKeys and
+    // moves the player accordingly
     this.handleInput = function(key) {
         if (this.canMove) {
             if (key === 'up') {
@@ -108,6 +116,8 @@ var Player = function() {
             }
         }
     };
+
+    // Returns the player to the starting position and allows for movement
     this.resetPosition = function() {
         this.x = 200;
         this.y = 380;
@@ -115,8 +125,9 @@ var Player = function() {
         this.alreadyCollided = false;
     };
 
-    // I learned how to bind the parameter 'this' to setTimout() and 
-    // setInterval() from Stack Overflow
+    // Takes appropriate action after a player collides with an enemy.
+    // Freezes the player and enemies momentarily, removes a life, and resets
+    // the user's position, among other actions.
     this.loseALife = function() {
         if (heartSprites.length > 0) {
             heartSprites[heartSprites.length - 1].remove();
@@ -129,6 +140,9 @@ var Player = function() {
         });
         if (game.livesRemaining > 0) {
             this.blinkEffect();
+
+            // I learned how to bind the parameter 'this' to setTimout() and 
+            // setInterval() from Stack Overflow
             setTimeout(function() {
                 allEnemies.forEach(function(enemy) {
                     enemy.canMove = true;
@@ -138,6 +152,9 @@ var Player = function() {
             }.bind(this), 1500);
         }
     };
+
+    // When a player collides with an enemy, they will flash momentarily.
+    // Called by the player.loseALife() method above
     this.blinkEffect = function() {
         var currentLocation = this.x;
         this.blinkInterval = setInterval(function() {
@@ -151,6 +168,9 @@ var Player = function() {
     };
 };
 
+// Produces heart sprite objects representing the player's lives.
+// The heart sprites are added to the heartSprites array at the
+// begining of a new game.
 var Heart = function(x, y) {
     this.sprite = new Image();
     this.sprite.src = 'images/Heart.png';
@@ -158,18 +178,26 @@ var Heart = function(x, y) {
     this.y = y;
 };
 
+// Draws a heart sprite onto the canvas.
 // Image scaling learned from Stack Overflow
 Heart.prototype.draw = function() {
     ctx.drawImage(this.sprite, this.x, this.y, 28, 28 * this.sprite.height / this.sprite.width);
 };
 
+// Removes a heart sprite from the canvas. Coincides with a player losing a life.
+// Called by the player.loseALife() method through the heartSprites array
 Heart.prototype.remove = function() {
     // ctx.fillStyle = 'black';
     // ctx.fillRect(this.x, this.y, 28, 40);
     ctx.clearRect(this.x, this.y, 28, 40);
 };
 
+// Produces collectible gems of various colors and point values.
+// Gems are created dynamically during the course of a game. When
+// the player picks up a gem, a new one is generated. Gem color
+// and location are randomly chosen.
 var Gem = function(color, x, y) {
+    // The color parameter decides the gem's url, type, and point value
     if (color === 'blue') {
         this.sprite = 'images/Gem-Blue.png';
         this.pointAmount = 100;
@@ -189,6 +217,7 @@ var Gem = function(color, x, y) {
     this.y = y;
 };
 
+// Keeps track of the gem's state. Handles 'collision' with player.
 Gem.prototype.update = function() {
     // Check if the player is within range of picking up a gem
     if (this.x - 5 > player.x && this.x - 40 < player.x &&
@@ -216,10 +245,12 @@ Gem.prototype.update = function() {
     }
 };
 
+// Draw a gem onto the canvas, like the Enemy and Player classes above
 Gem.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y, 60, 102);
 };
 
+// Game object that contains game-specific properties and methods
 var game = {
     isOver: false,
     livesRemaining: 3,
@@ -348,17 +379,27 @@ var bug4 = new Enemy(-700, 143, 400);
 // Bottom row of enemies
 var bug5 = new Enemy(-2380, 227, 500);
 var bug6 = new Enemy(-100, 227, 500);
+
+// Array containing all of the enemy objects
 var allEnemies = [bug1, bug2, bug3, bug4, bug5, bug6];
 
 var player = new Player();
 
-// Player lives
+// Player heart sprites representing lives
 var heart1 = new Heart(405, 8);
 var heart2 = new Heart(440, 8);
 var heart3 = new Heart(475, 8);
+
+// Array that is filled with the heart sprites. The sprites are added by
+// game.drawHearts() at the beginning of a new game.
 var heartSprites;
 
+// Array that is filled with a single gem at a time. The array is filled
+// by game.generateGem() at the beginning of a new game and whenever the
+// player picks up a gem (after popping the previous gem).
 var gems = [];
+
+// Possible locations for a new gem. Used by the game.generateGem() method.
 var gemLocations = [[20, 105], [121, 105], [222, 105], [323, 105], [424, 105],
                     [20, 188], [121, 188], [222, 188], [323, 188], [424, 188],
                     [20, 271], [121, 271], [222, 271], [323, 271], [424, 271]];
@@ -382,6 +423,7 @@ document.addEventListener('keydown', function(e) {
 
 // Add the event listener after the page has finished loading
 $(function() {
+    // Hides the dialog box and starts a new game when the button is clicked
     $('button').on('click', function() {
         $('.dialog-box, .dark-overlay').animate({opacity: 0}, 'fast', function() {
             $(this).hide();
