@@ -10,6 +10,9 @@ var Enemy = function(x, y, speed) {
     // Initial enemy starting position
     this.x = x;
     this.y = y;
+
+    // Store the original x position
+    this.originalXPos = x;
     this.speed = speed;
     this.canMove = false;
 };
@@ -27,7 +30,8 @@ Enemy.prototype.update = function(dt) {
 
     // Reset enemy position once it leaves the visible canvas
     if (this.x > 505) {
-        this.x = -2000;
+        // this.x = this.originalXPos;
+        this.resetPosition();
     }
 
     // Check and handle collision
@@ -43,6 +47,10 @@ Enemy.prototype.update = function(dt) {
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+Enemy.prototype.resetPosition = function() {
+    this.x = this.originalXPos;
 };
 
 // Now write your own player class
@@ -244,6 +252,7 @@ var game = {
         this.drawHearts();
         this.generateGem();
         allEnemies.forEach(function(enemy) {
+            enemy.resetPosition();
             enemy.canMove = true;
         });
     },
@@ -320,19 +329,17 @@ var game = {
 // Place the player object in a variable called player
 
 // Top row of enemies
-var bug1 = new Enemy(10, 60, 150);
-var bug2 = new Enemy(-2500, 60, 500);
-var bug3 = new Enemy(-800, 60, 300);
+var bug1 = new Enemy(-2500, 60, 300);
+var bug2 = new Enemy(-300, 60, 300);
 
 // Middle row of enemies
-var bug4 = new Enemy(150, 143, 250);
-var bug5 = new Enemy(-1200, 143, 500);
-var bug6 = new Enemy(-1600, 143, 300);
+var bug3 = new Enemy(-2900, 143, 400);
+var bug4 = new Enemy(-700, 143, 400);
 
 // Bottom row of enemies
-var bug7 = new Enemy(300, 227, 300);
-var bug8 = new Enemy(-2000, 227, 500);
-var allEnemies = [bug1, bug2, bug3, bug4, bug5, bug6, bug7, bug8];
+var bug5 = new Enemy(-2380, 227, 500);
+var bug6 = new Enemy(-100, 227, 500);
+var allEnemies = [bug1, bug2, bug3, bug4, bug5, bug6];
 
 var player = new Player();
 
