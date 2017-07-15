@@ -141,7 +141,7 @@ var Player = function() {
         if (game.livesRemaining > 0) {
             this.blinkEffect();
 
-            // I learned how to bind the parameter 'this' to setTimout() and 
+            // I learned how to bind the parameter 'this' to setTimout() and
             // setInterval() from Stack Overflow
             setTimeout(function() {
                 allEnemies.forEach(function(enemy) {
@@ -178,7 +178,7 @@ var Heart = function(x, y) {
     this.y = y;
 };
 
-// Draws a heart sprite onto the canvas.
+// Draws a heart sprite onto the canvas. Called by game.drawHearts().
 // Image scaling learned from Stack Overflow
 Heart.prototype.draw = function() {
     ctx.drawImage(this.sprite, this.x, this.y, 28, 28 * this.sprite.height / this.sprite.width);
@@ -187,8 +187,6 @@ Heart.prototype.draw = function() {
 // Removes a heart sprite from the canvas. Coincides with a player losing a life.
 // Called by the player.loseALife() method through the heartSprites array
 Heart.prototype.remove = function() {
-    // ctx.fillStyle = 'black';
-    // ctx.fillRect(this.x, this.y, 28, 40);
     ctx.clearRect(this.x, this.y, 28, 40);
 };
 
@@ -252,13 +250,24 @@ Gem.prototype.render = function() {
 
 // Game object that contains game-specific properties and methods
 var game = {
+    // Used to prevent multiple calls to game.end() by player.update()
     isOver: false,
+
+    // Counter containing total lives. When lives reaches 0, the game ends
     livesRemaining: 3,
+
+    // Counter containing score. Increased by reaching the water
+    // and collecting gems.
     score: 0,
+
+    // The following 4 variables keep track of the gems collected
     gemsCollected: 0,
     blueGems: 0,
     greenGems: 0,
     orangeGems: 0,
+
+    // Starts the game by resetting all relevant variables and states.
+    // Most importantly, allows the player and enemies to move.
     start: function() {
         player.resetPosition();
         this.isOver = false;
@@ -278,35 +287,47 @@ var game = {
             enemy.canMove = true;
         });
     },
+
+    // Formats the text to be drawn at the top of the canvas
     formatDisplayText: function() {
         ctx.font = "16pt arial";
         ctx.textAlign = 'left';
-        ctx.fillStyle = 'black'; 
+        ctx.fillStyle = 'black';
     },
+
+    // Draws the score at the top of the canvas
     drawScore: function() {
         this.formatDisplayText();
         this.removeScore();
         ctx.fillText('Score: ' + this.score, 0, 42);
     },
+
+    // Removes the score by clearing it from the canvas
     removeScore: function() {
         ctx.clearRect(0, 15, 240, 33);
-        // ctx.fillStyle = 'black';
-        // ctx.fillRect(0, 15, 240, 33);
     },
+
+    // Adds points to game.score and then updates the score on the canvas
     addPoints: function(points) {
         this.score += points;
         this.drawScore();
     },
+
+    // Draws the gem total at the top of the canvas
     drawGemTotal: function() {
         this.formatDisplayText();
         this.removeGemTotal();
         ctx.fillText('Gems: ' + this.gemsCollected, 243, 42);
     },
+
+    // Removes the gem total by clearing it from the canvas
     removeGemTotal: function() {
         ctx.clearRect(243, 15, 160, 33);
-        // ctx.fillStyle = 'black';
-        // ctx.fillRect(243, 15, 160, 33);
     },
+
+    // Draws the heart sprites at the top of the canvas. It first adds
+    // the heart sprite objects to the heartSprites array and then calls
+    // each object's draw() method using a forEach loop.
     drawHearts: function() {
         heartSprites = [heart1, heart2, heart3];
         heartSprites.forEach(function(heart) {
@@ -314,6 +335,8 @@ var game = {
         });
     },
 
+    // Chooses a random color based on probability. Blue gems have the highest
+    // probability, while orange gems have the least. Called by game.generateGem().
     // Random number with probability developed with help from
     // Stack Overflow
     getGemColor: function() {
@@ -329,10 +352,16 @@ var game = {
         }
     },
 
+    // Gets a random integer between 0 and gemLocations.length. Called by
+    // game.generateGem() to determine a new gem's location.
     // MDN used as a reference
     getGemLocation: function() {
         return Math.floor(Math.random() * gemLocations.length);
     },
+
+    // Generates a new gem. Color and location are randomly chosen. Called by
+    // game.start() at the beginning of a new game and called by Gem.update()
+    // after a player picks up a gem.
     generateGem: function() {
         var color = this.getGemColor();
 
@@ -342,8 +371,13 @@ var game = {
             var i = this.getGemLocation();
         } while (gemLocations[i][0] + 150 > player.x && gemLocations[i][0] - 150 < player.x &&
                 gemLocations[i][1] + 150 > player.y && gemLocations[i][1] - 150 < player.y);
+
+        // Add the newly generated gem to the gems array
         gems.push(new Gem(color, gemLocations[i][0], gemLocations[i][1]));
     },
+
+    // Ends the game by freezing the player and enemies, clearing the top display
+    // (score and gem total), and opening the game-over dialog box with results.
     end: function() {
         this.isOver = true;
         player.canMove = false;
