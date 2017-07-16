@@ -10,7 +10,18 @@
     <script src="js/resources.js"></script>
     <script src="js/app.js"></script>
     <script src="js/engine.js"></script>
+
+    <!--
+    Dark overlay tint that lies on top of the canvas. It serves as a
+    backdrop for both of the dialog boxes. It is only visible at the
+    beginning and end of the game.
+    -->
     <div class="dark-overlay"></div>
+
+    <!--
+    The intro dialog box that lies on top of the dark overlay div. It is
+    only visible at the beginning of the game.
+    -->
     <div class="intro-box dialog-box">
     	<h1>Frogger-Style Arcade Game</h1>
     	<h2>Objectives</h2>
@@ -19,6 +30,11 @@
     	</p>
     	<button>Play Game</button>
     </div>
+
+    <!--
+    The game-over dialog box that lies on top of the dark overlay div.
+    It is only visible at the end of the game.
+    -->
     <div class="game-over-box dialog-box">
     	<h1>Game Over!</h1>
     	<h2>Results</h2>
