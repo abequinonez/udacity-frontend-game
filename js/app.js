@@ -367,8 +367,9 @@ var game = {
 
         // If the gem position is too close to the player, try again.
         // Basically, a new gem will never appear near the player
+        var i;
         do {
-            var i = this.getGemLocation();
+            i = this.getGemLocation();
         } while (gemLocations[i][0] + 150 > player.x && gemLocations[i][0] - 150 < player.x &&
                 gemLocations[i][1] + 150 > player.y && gemLocations[i][1] - 150 < player.y);
 
